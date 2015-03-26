@@ -34,3 +34,7 @@ Build it using `bakor` in the project directory. This will result in the followi
   * [app name + less filename].min.css - Baked + minified less CSS (if less files are supplied)
 
 If less files are used, each less file supplied in the array will result in **a separate css file**. The idea is to include a single less file which uses `import` to fetch the rest of them. This way it's easy to bake several different color schemes etc. 
+
+## License
+
+MIT. See LICENSE file.
