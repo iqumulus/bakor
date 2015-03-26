@@ -1,0 +1,154 @@
+#!/usr/bin/env node
+
+var 
+    fs = require('fs'),
+    UglifyJS = require('uglify-js'),
+    cleanCSS = require('clean-css'),
+    less = require('less'),
+    wdir = process.cwd() + '/',
+    config = {
+      name: 'unknown',
+      outputDir: './build/',
+      js: [],
+      css: [],
+      less: []
+    }
+;
+
+///////////////////////////////////////////////////////////////////////////////
+
+function loadConfig(filename, fn) {
+
+  fs.readFile(wdir + filename, 'utf8', function (err, str) {
+    var c;
+
+    if (err) {
+      console.log('Error loading bakor.json: ' + err);
+      return;
+    }
+
+    try {
+      c = JSON.parse(str);
+    } catch (e) {
+      console.log('Error parsing bakor.json: ' + e.toString());
+      return;
+    }
+
+    config.name = c.name || config.name;
+    config.outputDir = c.outputDir || config.outputDir;
+    config.js = c.js || config.js;
+    config.css = c.css || config.css;
+    config.less = c.less || config.less;
+
+    if (config.outputDir[config.outputDir.length - 1] !== '/') {
+      config.outputDir += '/';
+    }
+
+    fn();
+
+  });
+}
+
+function apndFile(source, filename) {
+  var r = fs.readFileSync(wdir + filename, 'utf8');
+  if (r) {
+    console.log('Fetched ' + filename + '...');
+    source += r;
+  } else {
+    throw 'Error reading ' + filename + ', aborting...';
+  }
+  return source;
+}
+
+function bake() {
+  var cssSource = '',
+      lessSource = ''
+  ;
+
+  //Load the scripts
+  fs.readFile(wdir + 'LICENSE', 'utf8', function (err, str) {
+    var minsource = '', 
+        source = '', 
+        license = ''
+    ;
+
+    if (!err) {
+      license = str;
+    } else {
+      console.log('WARN: No license file found...');
+    }
+
+    config.js.forEach(function (filename) {
+      source = apndFile(source, filename);
+    });
+
+    fs.writeFile(config.outputDir + config.name + '.js', source, 'utf8', function (err) {
+      if (err) {
+        console.log('Error writing baked file: ' + err);
+      }
+    });
+
+    minsource = UglifyJS.minify(source, {fromString: true});
+
+    fs.writeFile(config.outputDir + config.name + '.min.js', '/*\n\n' + license + '\n*/\n\n\n' + minsource.code, 'utf8', function (err) {
+      if (err) {
+        console.log('Error writing minified source: ' + err);
+      }
+    });
+  });
+
+  config.css.forEach(function (filename) {
+    cssSource = apndFile(cssSource, filename);
+  });
+
+  if (cssSource && cssSource.length > 0) {
+      fs.writeFile(config.outputDir + config.name + '.css', cssSource, 'utf8', function (err) {
+        if (err) {
+          console.log('Error writing baked css: ' + err);
+        }
+      });
+
+      fs.writeFile(config.outputDir + config.name + '.min.css', (new cleanCSS()).minify(cssSource).styles, 'utf8', function (err) {
+      if (err) {
+        console.log('Error writing minified css: ' + err);
+      }
+    });
+  }
+
+  config.less.forEach(function (filename) {
+    var pname = filename.substr(filename.lastIndexOf('/') + 1).replace('.less', ''),
+        path = filename.substr(0, filename.lastIndexOf('/')),
+        fname = config.name + '.' + pname
+    ;
+
+    fs.readFile(wdir + filename, 'utf8', function (err, str) {
+      if (err) {
+        console.log('Error fetching less file ' + filename);
+      } else {
+        console.log('Fetched ' + filename + '...');
+        
+        less.render(str, {paths: ['.', wdir, wdir + path]}, function (e, output) {
+
+          if (e) {
+            console.log('Error rendering less: ' + e);
+            return;
+          }
+
+          fs.writeFile(config.outputDir + fname + '.css', output.css, 'utf8', function (err) {
+            if (err) {
+              console.log('Error writing baked less: ' + err);
+            }
+          });
+        
+          fs.writeFile(config.outputDir + fname + '.min.css', new cleanCSS().minify(output.css).styles, 'utf8', function (err) {
+            if (err) {
+              console.log('Error writing minified less: ' + err);
+            }
+          });
+        });
+      }
+    });
+  });
+}
+
+loadConfig('bakor.json', bake);

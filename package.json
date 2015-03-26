@@ -1,0 +1,17 @@
+{
+  "author": "IQumulus LLC",
+  "name": "bakor",
+  "description": "Simple JavaScript, CSS, and LESS baker",
+  "version": "0.0.1",
+  "license":"MIT",
+  "repository":"https://github.com/iqumulus/bakor",
+  "main":"bin/bakor",
+  "bin": {
+    "bakor": "bin/bakor"
+  },
+  "dependencies": {
+    "uglify-js": "2.4.0",
+    "clean-css": "*",
+    "less": "*"
+  }
+}
