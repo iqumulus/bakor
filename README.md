@@ -25,6 +25,12 @@ Create a `bakor.json` file in your project:
       ]
     }
 
-Build it using `bakor` in the project directory.
+Build it using `bakor` in the project directory. This will result in the following files in `outputDir`:
+  * [app name].js - Baked JavaScript (if JavaScript files are supplied)
+  * [app name].min.js - Baked + minified JavaScript (if JavaScript files are supplied)
+  * [app name].css - Baked CSS (if CSS files are supplied)
+  * [app name].min.css - Baked + minified CSS (if CSS files are supplied)
+  * [app name + less filename].css - Baked less CSS (if less files are supplied)
+  * [app name + less filename].min.css - Baked + minified less CSS (if less files are supplied)
 
-Less files are of course optional. If you do use less, each less file supplied in the array will result in *a separate css file*. The idea is to include a single less file which uses `import` to fetch the rest of them. This way it's easy to several different color schemes etc. 
+If less files are used, each less file supplied in the array will result in **a separate css file**. The idea is to include a single less file which uses `import` to fetch the rest of them. This way it's easy to bake several different color schemes etc. 
