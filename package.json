@@ -4,14 +4,24 @@
   "description": "Simple JavaScript, CSS, and LESS baker",
   "version": "0.0.1",
   "license":"MIT",
-  "repository":"https://github.com/iqumulus/bakor",
-  "main":"bin/bakor",
+  "preferGlobal": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iqumulus/bakor"
+  },
   "bin": {
-    "bakor": "bin/bakor"
+    "bakor": "./bin/bakor"
+  },
+  "directories": {
+    "bin": "./bin"
+  },
+  "scripts": {
+    "start": "node ./bin/bakor"
   },
   "dependencies": {
     "uglify-js": "2.4.0",
     "clean-css": "*",
     "less": "*"
-  }
+  },
+  "engine":"node >= 0.4.1"
 }
